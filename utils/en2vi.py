@@ -9,12 +9,12 @@ def do_translate(data: list, idx: int):
     save_path = os.path.join(save_path, "trans_{}.json".format(idx))
     translator = Translator()
 
-    new_data = []
+    new_data = {}
     count = 0
     while True:
         try:
             trans = translator.translate(data[count], dest='vi')
-            new_data.append(trans.text)
+            new_data[data[count]] = trans.text
             count += 1
             if count % 1000 == 0:
                 print(idx, len(new_data))
@@ -30,12 +30,19 @@ def do_translate(data: list, idx: int):
 if __name__ == "__main__":
     data_path = r'./convert_data/text.json'
     raw_data = json.loads(open(data_path, 'r', encoding='utf-8').read())
-    thread_num = 10
-    data_len = len(raw_data)
+    thread_num = 20
+    tag = {}
+    for i, item in enumerate(raw_data):
+        if item not in tag:
+            tag[item] = [i]
+        else:
+            tag[item].append(i)
+    data_len = len(tag.keys())
     part_len = data_len // thread_num
     split_data = []
+    tag_key = list(tag.keys())
     for i in range(thread_num):
-        split_data.append(raw_data[i * part_len:min([(i + 1) * part_len, data_len])])
+        split_data.append(tag_key[i * part_len:min([(i + 1) * part_len, data_len])])
 
     threads = []
     for i in range(thread_num):
