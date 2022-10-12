@@ -38,12 +38,12 @@ if __name__ == "__main__":
         split_data.append(raw_data[i * part_len:min([(i + 1) * part_len, data_len])])
 
     threads = []
-    for i in range(1):
+    for i in range(thread_num):
         tmp = Thread(target=do_translate, args=[split_data[i], i])
         threads.append(tmp)
 
-    for i in range(1):
+    for i in range(thread_num):
         threads[i].start()
 
-    for i in range(1):
+    for i in range(thread_num):
         threads[i].join()
