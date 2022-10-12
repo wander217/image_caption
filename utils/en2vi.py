@@ -6,6 +6,7 @@ from threading import Thread
 
 def do_translate(data: list, idx: int):
     save_path = r'./convert_data'
+    save_path = os.path.join(save_path, "trans_{}.json".format(idx))
     translator = Translator(service_urls=[
         'translate.google.com',
         'translate.google.co.kr',
@@ -19,14 +20,14 @@ def do_translate(data: list, idx: int):
             new_data.append(trans.text)
             count += 1
             if count % 1000 == 0:
-                print(id, len(new_data))
+                print(idx, len(new_data))
                 print(trans.text)
-                open(os.path.join(save_path, "trans_text_{}.json".format(idx)), 'w', encoding='utf-8').write(
-                    json.dumps(new_data, indent=4))
-            if count > len(data):
-                break
+                open(save_path, 'w', encoding='utf-8').write(json.dumps(new_data, indent=4))
         except Exception as e:
             print(e)
+        finally:
+            if count > len(data):
+                break
 
 
 if __name__ == "__main__":
