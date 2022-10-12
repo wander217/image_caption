@@ -7,10 +7,7 @@ from threading import Thread
 def do_translate(data: list, idx: int):
     save_path = r'./convert_data'
     save_path = os.path.join(save_path, "trans_{}.json".format(idx))
-    translator = Translator(service_urls=[
-        'translate.google.com',
-        'translate.google.co.kr',
-    ])
+    translator = Translator()
 
     new_data = []
     count = 0
@@ -41,12 +38,12 @@ if __name__ == "__main__":
         split_data.append(raw_data[i * part_len:min([(i + 1) * part_len, data_len])])
 
     threads = []
-    for i in range(thread_num):
+    for i in range(1):
         tmp = Thread(target=do_translate, args=[split_data[i], i])
         threads.append(tmp)
 
-    for i in range(thread_num):
+    for i in range(1):
         threads[i].start()
 
-    for i in range(thread_num):
+    for i in range(1):
         threads[i].join()
