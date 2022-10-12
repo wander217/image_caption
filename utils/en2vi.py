@@ -1,39 +1,51 @@
 import json
-
-import tqdm
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
-tokenizer_en2vi = AutoTokenizer.from_pretrained("vinai/vinai-translate-en2vi", src_lang="en_XX")
-model_en2vi = AutoModelForSeq2SeqLM.from_pretrained("vinai/vinai-translate-en2vi")
+import os
+from googletrans import Translator
+from threading import Thread
 
 
-def translate_en2vi(en_text: str) -> str:
-    input_ids = tokenizer_en2vi(en_text, return_tensors="pt").input_ids
-    output_ids = model_en2vi.generate(
-        input_ids,
-        do_sample=True,
-        top_k=100,
-        top_p=0.8,
-        decoder_start_token_id=tokenizer_en2vi.lang_code_to_id["vi_VN"],
-        num_return_sequences=1,
-    )
-    vi_text = tokenizer_en2vi.batch_decode(output_ids, skip_special_tokens=True)
-    vi_text = " ".join(vi_text)
-    return vi_text
+def do_translate(data: list, idx: int):
+    save_path = r'./convert_data'
+    translator = Translator(service_urls=[
+        'translate.google.com',
+        'translate.google.co.kr',
+    ])
+
+    new_data = []
+    count = 0
+    while True:
+        try:
+            trans = translator.translate(data[count], dest='vi')
+            new_data.append(trans.text)
+            count += 1
+            if count % 1000 == 0:
+                print(id, len(new_data))
+                print(trans.text)
+                open(os.path.join(save_path, "trans_text_{}.json".format(idx)), 'w', encoding='utf-8').write(
+                    json.dumps(new_data, indent=4))
+            if count > len(data):
+                break
+        except Exception as e:
+            print(e)
 
 
-# en_text = "I haven't been to a public gym before. When I exercise in a private space, I feel more comfortable."
-# print(translate_en2vi(en_text))
-#
-# en_text = "i haven't been to a public gym before when i exercise in a private space i feel more comfortable"
-# print(translate_en2vi(en_text))
+if __name__ == "__main__":
+    data_path = r'./convert_data/text.json'
+    raw_data = json.loads(open(data_path, 'r', encoding='utf-8').read())
+    thread_num = 10
+    data_len = len(raw_data)
+    part_len = data_len // thread_num
+    split_data = []
+    for i in range(thread_num):
+        split_data.append(raw_data[i * part_len:min([(i + 1) * part_len, data_len])])
 
-data_path = r"C:\Users\admin\Downloads\region_descriptions.json\region_descriptions.json"
-data = json.loads(open(data_path, 'r', encoding='utf-8').read())
-for item in tqdm.tqdm(data):
-    for region in item['regions']:
-        txt = region['phrase']
-        trans = translate_en2vi(txt)
-        region['phrase'] = trans
-save_data_path = r'F:\project\python\image_caption\convert_data\vi_region_descriptions.json'
-open(save_data_path,'w', encoding='utf-8').write(json.dumps(data))
+    threads = []
+    for i in range(thread_num):
+        tmp = Thread(target=do_translate, args=[split_data[i], i])
+        threads.append(tmp)
+
+    for i in range(thread_num):
+        threads[i].start()
+
+    for i in range(thread_num):
+        threads[i].join()
