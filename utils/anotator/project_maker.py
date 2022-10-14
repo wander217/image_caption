@@ -66,7 +66,7 @@ def do_create(host_name: str,
         image_id = add_image(client,
                              int(project_id),
                              os.path.join(root, image['path']))
-        for text in image['text']:
+        for text in image['texts']:
             url = f'v1/projects/{project_id}/examples/{image_id}/texts'
             client.post(url, json={"text": text})
 
