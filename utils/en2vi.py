@@ -13,10 +13,10 @@ def do_translate(data: list, idx: int):
     count = 0
     while True:
         try:
-            trans = translator.translate(data[count], dest='vi')
+            trans = translator.translate(data[count], src="en", dest='vi')
             new_data[data[count]] = trans.text
             count += 1
-            if count % 1000 == 0:
+            if count % 100 == 0:
                 print(idx, len(new_data))
                 print(trans.text)
                 open(save_path, 'w', encoding='utf-8').write(json.dumps(new_data, indent=4))
@@ -28,9 +28,9 @@ def do_translate(data: list, idx: int):
 
 
 if __name__ == "__main__":
-    data_path = r'./convert_data/text.json'
+    data_path = r'./convert_data/un_trans_0.json'
     raw_data = json.loads(open(data_path, 'r', encoding='utf-8').read())
-    thread_num = 20
+    thread_num = 1
     tag = {}
     for i, item in enumerate(raw_data):
         if item not in tag:
