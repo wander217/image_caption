@@ -8,7 +8,9 @@ for item in raw_data:
     for region in item['regions']:
         txt = region['phrase']
         trans = trans_data.get(txt.capitalize(), '')
-        region['phrase'] = trans
+        del region['phrase']
+        region['trans'] = trans
+        region['raw'] = txt
 
 for item in raw_data:
     with open("./splited_data/{}.json".format(item['id']), 'w') as f:

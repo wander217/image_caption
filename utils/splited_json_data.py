@@ -7,19 +7,21 @@ save_path = r'F:\project\data\image_caption\target'
 
 for folder in os.listdir(root):
     folder_path = os.path.join(root, folder)
-    save_folder_path = os.path.join(save_path, folder)
-
-    if not os.path.isdir(save_folder_path):
-        os.mkdir(save_folder_path)
+    new_data  = []
     for item in os.listdir(folder_path):
         item_name = item.split(".")[0]
         try:
             data = json.loads(open(os.path.join(json_root, "{}.json".format(item_name)), 'r', encoding='utf-8').read())
-
-            with open(os.path.join(save_folder_path, "{}.json".format(item_name)), 'w', encoding='utf-8') as f:
-                f.write(json.dumps(data, indent=4))
+            text = []
+            for region in data['regions']:
+                text.append(region['raw'])
+                text.append(region['trans'])
+            new_data.append({
+                "name": item_name,
+                "texts": text
+            })
         except Exception as e:
             print(e)
-
-# with open("./file.json", 'w', encoding='utf-8') as f:
-#     f.write(json.dumps(file_name, indent=4))
+    save_path = r'F:\project\data\image_caption\texts'
+    with open(os.path.join(save_path, "{}.json".format(folder)), 'w', encoding='utf-8') as f:
+        f.write(json.dumps(new_data, indent=4))
