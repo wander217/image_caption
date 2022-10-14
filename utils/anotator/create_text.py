@@ -5,11 +5,11 @@ from admin_config import ADMIN_CONFIG
 from tqdm import tqdm
 
 
-def add_image(host_name: str,
-              admin_username: str,
-              admin_password: str,
-              project_id: int,
-              image_path: str):
+def create_text(host_name: str,
+                admin_username: str,
+                admin_password: str,
+                project_id: int,
+                image_path: str):
     client = DoccanoClient(host_name, admin_username, admin_password)
     upload_ids = []
     for image_file in tqdm(os.listdir(image_path)):
